@@ -1,7 +1,7 @@
 import { Canvas } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import GlassKnot from './GlassKnot.jsx'
-import GlowSpheres from './GlowSpheres.jsx'
+import GlowLights from './GlowLights.jsx'
 
 function HeroScene() {
   return (
@@ -15,7 +15,7 @@ function HeroScene() {
       <Environment preset="city" />
 
       <GlassKnot />
-      <GlowSpheres />
+      <GlowLights />
     </Canvas>
   )
 }
