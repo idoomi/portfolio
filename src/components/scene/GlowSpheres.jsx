@@ -2,9 +2,9 @@ import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 
 const spheres = [
-  { position: [-3.4, 1.2, -3], color: '#00e5ff', speed: 0.6 },
-  { position: [3.6, -0.8, -2.4], color: '#ff2ea6', speed: 0.45 },
-  { position: [0.4, 2.8, -3.6], color: '#ff8a00', speed: 0.75 },
+  { position: [-1.6, 0.6, -1.2], color: '#00e5ff', speed: 0.6 },
+  { position: [1.7, -0.4, -0.8], color: '#ff2ea6', speed: 0.45 },
+  { position: [0.2, 1.4, -1.6], color: '#ff8a00', speed: 0.75 },
 ]
 
 function GlowSphere({ position, color, speed }) {
@@ -22,7 +22,7 @@ function GlowSphere({ position, color, speed }) {
         <sphereGeometry args={[0.45, 32, 32]} />
         <meshBasicMaterial color={color} toneMapped={false} />
       </mesh>
-      <pointLight color={color} intensity={12} distance={10} />
+      <pointLight color={color} intensity={4} distance={4} />
     </group>
   )
 }
