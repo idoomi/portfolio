@@ -1,23 +1,16 @@
-import { Link } from 'react-router-dom'
-import './Home.css'
+import HeroScene from '../components/scene/HeroScene.jsx'
 
 function Home() {
   return (
-    <section className="hero">
-      <p className="hero-eyebrow">Hi, my name is</p>
-      <h1 className="hero-name">Marian Nadine Amar</h1>
-      <h2 className="hero-tagline">I build things for the web.</h2>
-      <p className="hero-description">
-        I'm a software developer focused on building clean, functional, and
-        user-friendly applications. Welcome to my portfolio.
-      </p>
-      <div className="hero-actions">
-        <Link to="/projects" className="btn btn-primary">
-          View Projects
-        </Link>
-        <Link to="/resume" className="btn btn-secondary">
-          View Resume
-        </Link>
+    <section className="relative w-full flex-1 overflow-hidden bg-[#0a0a0c]">
+      <div className="absolute inset-0">
+        <HeroScene />
+      </div>
+
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <h1 className="m-0 select-none font-sans text-[18vw] font-black uppercase leading-none tracking-tighter text-[#f5f5f5] sm:text-[14vw]">
+          Hi
+        </h1>
       </div>
     </section>
   )
