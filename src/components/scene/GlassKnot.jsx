@@ -1,14 +1,71 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { MeshTransmissionMaterial } from '@react-three/drei'
+import { MathUtils } from 'three'
+
+const ROTATION_INFLUENCE = 0.5
+const POSITION_INFLUENCE = 0.2
+const DAMPING = 4
 
 function GlassKnot() {
   const ref = useRef(null)
+  const target = useRef({ x: 0, y: 0 })
+  const isPointerActive = useRef(true)
 
-  useFrame((_, delta) => {
+  useEffect(() => {
+    const handlePointerLeave = () => {
+      isPointerActive.current = false
+      target.current.x = 0
+      target.current.y = 0
+    }
+
+    const handlePointerEnter = () => {
+      isPointerActive.current = true
+    }
+
+    document.addEventListener('pointerleave', handlePointerLeave)
+    document.addEventListener('pointerenter', handlePointerEnter)
+
+    return () => {
+      document.removeEventListener('pointerleave', handlePointerLeave)
+      document.removeEventListener('pointerenter', handlePointerEnter)
+    }
+  }, [])
+
+  useFrame((state, delta) => {
     if (!ref.current) return
-    ref.current.rotation.x += delta * 0.15
-    ref.current.rotation.y += delta * 0.2
+
+    if (isPointerActive.current) {
+      target.current.x = state.pointer.x
+      target.current.y = state.pointer.y
+    }
+
+    const { x, y } = target.current
+
+    ref.current.rotation.x = MathUtils.damp(
+      ref.current.rotation.x,
+      y * ROTATION_INFLUENCE,
+      DAMPING,
+      delta,
+    )
+    ref.current.rotation.y = MathUtils.damp(
+      ref.current.rotation.y,
+      x * ROTATION_INFLUENCE,
+      DAMPING,
+      delta,
+    )
+    ref.current.position.x = MathUtils.damp(
+      ref.current.position.x,
+      x * POSITION_INFLUENCE,
+      DAMPING,
+      delta,
+    )
+    ref.current.position.y = MathUtils.damp(
+      ref.current.position.y,
+      y * POSITION_INFLUENCE,
+      DAMPING,
+      delta,
+    )
   })
 
   return (
