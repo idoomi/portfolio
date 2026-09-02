@@ -1,12 +1,12 @@
 import { Canvas } from '@react-three/fiber'
 import { Environment, OrbitControls } from '@react-three/drei'
-import GlassKnot from './GlassKnot.jsx'
+import GlassText from './GlassText.jsx'
 import GlowSpheres from './GlowSpheres.jsx'
 
 function HeroScene() {
   return (
     <Canvas
-      camera={{ position: [0, 0, 5.5], fov: 45 }}
+      camera={{ position: [0, 0, 7], fov: 45 }}
       dpr={[1, 2]}
       gl={{ antialias: true }}
     >
@@ -14,7 +14,7 @@ function HeroScene() {
       <ambientLight intensity={0.2} />
       <Environment preset="city" />
 
-      <GlassKnot />
+      <GlassText />
       <GlowSpheres />
 
       <OrbitControls enableZoom={false} enablePan={false} />
