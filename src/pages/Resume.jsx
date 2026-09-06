@@ -1,14 +1,25 @@
+import { useState } from 'react'
+import CvDownloadModal from '../components/CvDownloadModal.jsx'
 import './Page.css'
 import './Resume.css'
 
 function Resume() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
   return (
     <section className="page">
       <div className="resume-header">
         <h1>Resume</h1>
-        <a className="btn btn-primary" href="/cv.pdf" download>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => setIsModalOpen(true)}
+        >
           Download CV (PDF)
-        </a>
+        </button>
+        {isModalOpen && (
+          <CvDownloadModal onClose={() => setIsModalOpen(false)} />
+        )}
       </div>
 
       <p className="resume-placeholder-note">
