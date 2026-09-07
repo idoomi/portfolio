@@ -4,7 +4,7 @@ import GlassKnot from './GlassKnot.jsx'
 import GlowLights from './GlowLights.jsx'
 import CursorLight from './CursorLight.jsx'
 
-function HeroScene() {
+function HeroScene({ interactive = true }) {
   return (
     <Canvas
       camera={{ position: [0, 0, 5.5], fov: 45 }}
@@ -15,7 +15,7 @@ function HeroScene() {
       <ambientLight intensity={0.2} />
       <Environment preset="city" />
 
-      <GlassKnot />
+      <GlassKnot interactive={interactive} />
       <GlowLights />
       <CursorLight />
     </Canvas>

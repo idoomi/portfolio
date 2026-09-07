@@ -1,5 +1,5 @@
 .page {
-  flex: 1;
+  width: 100%;
   max-width: 800px;
   margin: 0 auto;
   padding: 48px 32px;
@@ -27,6 +27,7 @@
   border-radius: 4px;
   background: var(--code-bg);
   color: var(--text-h);
+  box-shadow: var(--shadow);
 }
 
 .contact-links {
@@ -54,6 +55,7 @@
 .btn-primary {
   background: var(--accent);
   color: #fff;
+  box-shadow: var(--shadow);
 }
 
 .btn-primary:hover {

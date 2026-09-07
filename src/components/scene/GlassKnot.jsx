@@ -10,6 +10,16 @@ const ROTATION_INFLUENCE = 0.5
 const POSITION_INFLUENCE = 0.2
 const DAMPING = 4
 
+// Idle motion (when not interactive) tuning
+const IDLE_ROTATION_X_SPEED = 0.3
+const IDLE_ROTATION_X_AMPLITUDE = 0.22
+const IDLE_ROTATION_Y_SPEED = 0.22
+const IDLE_ROTATION_Y_AMPLITUDE = 0.3
+const IDLE_BOB_SPEED = 0.6
+const IDLE_BOB_AMPLITUDE = 0.18
+const IDLE_SWAY_SPEED = 0.35
+const IDLE_SWAY_AMPLITUDE = 0.1
+
 // Water-brush deformation tuning
 const BRUSH_RADIUS = 0.85
 const BRUSH_RADIUS_SQ = BRUSH_RADIUS * BRUSH_RADIUS
@@ -30,7 +40,7 @@ const MAX_STEPS_PER_MOVE = 8
 const EASE_RATE = 9
 const SETTLE_EPSILON = 0.0006
 
-function GlassKnot() {
+function GlassKnot({ interactive = true }) {
   const ref = useRef(null)
   const geometryRef = useRef(null)
   const target = useRef({ x: 0, y: 0 })
@@ -94,6 +104,7 @@ function GlassKnot() {
   }, [])
 
   const handleSurfaceMove = (event) => {
+    if (!interactive) return
     event.stopPropagation()
     if (!ref.current) return
 
@@ -141,37 +152,66 @@ function GlassKnot() {
   useFrame((state, delta) => {
     if (!ref.current) return
 
-    if (isPointerActive.current) {
-      target.current.x = state.pointer.x
-      target.current.y = state.pointer.y
+    if (!interactive) {
+      const t = state.clock.elapsedTime
+
+      ref.current.rotation.x = MathUtils.damp(
+        ref.current.rotation.x,
+        Math.sin(t * IDLE_ROTATION_X_SPEED) * IDLE_ROTATION_X_AMPLITUDE,
+        DAMPING,
+        delta,
+      )
+      ref.current.rotation.y = MathUtils.damp(
+        ref.current.rotation.y,
+        Math.cos(t * IDLE_ROTATION_Y_SPEED) * IDLE_ROTATION_Y_AMPLITUDE,
+        DAMPING,
+        delta,
+      )
+      ref.current.position.x = MathUtils.damp(
+        ref.current.position.x,
+        Math.cos(t * IDLE_SWAY_SPEED) * IDLE_SWAY_AMPLITUDE,
+        DAMPING,
+        delta,
+      )
+      ref.current.position.y = MathUtils.damp(
+        ref.current.position.y,
+        Math.sin(t * IDLE_BOB_SPEED) * IDLE_BOB_AMPLITUDE,
+        DAMPING,
+        delta,
+      )
+    } else {
+      if (isPointerActive.current) {
+        target.current.x = state.pointer.x
+        target.current.y = state.pointer.y
+      }
+
+      const { x, y } = target.current
+
+      ref.current.rotation.x = MathUtils.damp(
+        ref.current.rotation.x,
+        y * ROTATION_INFLUENCE,
+        DAMPING,
+        delta,
+      )
+      ref.current.rotation.y = MathUtils.damp(
+        ref.current.rotation.y,
+        x * ROTATION_INFLUENCE,
+        DAMPING,
+        delta,
+      )
+      ref.current.position.x = MathUtils.damp(
+        ref.current.position.x,
+        x * POSITION_INFLUENCE,
+        DAMPING,
+        delta,
+      )
+      ref.current.position.y = MathUtils.damp(
+        ref.current.position.y,
+        y * POSITION_INFLUENCE,
+        DAMPING,
+        delta,
+      )
     }
-
-    const { x, y } = target.current
-
-    ref.current.rotation.x = MathUtils.damp(
-      ref.current.rotation.x,
-      y * ROTATION_INFLUENCE,
-      DAMPING,
-      delta,
-    )
-    ref.current.rotation.y = MathUtils.damp(
-      ref.current.rotation.y,
-      x * ROTATION_INFLUENCE,
-      DAMPING,
-      delta,
-    )
-    ref.current.position.x = MathUtils.damp(
-      ref.current.position.x,
-      x * POSITION_INFLUENCE,
-      DAMPING,
-      delta,
-    )
-    ref.current.position.y = MathUtils.damp(
-      ref.current.position.y,
-      y * POSITION_INFLUENCE,
-      DAMPING,
-      delta,
-    )
 
     const geometry = geometryRef.current
     const base = basePositions.current

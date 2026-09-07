@@ -2,4 +2,51 @@
   display: flex;
   flex-direction: column;
   min-height: 100svh;
+  --text: rgba(255, 255, 255, 0.9);
+  --text-h: #fff;
+  --border: rgba(255, 255, 255, 0.25);
+  --code-bg: rgba(255, 255, 255, 0.1);
+  --social-bg: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+
+.persistent-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.page-fade {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  cursor: pointer;
+  transition: opacity 0.25s ease;
+  background: rgba(5, 10, 20, 0.05);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.page-fade-home {
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  pointer-events: none;
+  cursor: default;
+}
+
+.page-fade-fadeIn {
+  opacity: 1;
+}
+
+.page-fade-fadeOut {
+  opacity: 0;
+}
+
+.page-fade .page {
+  pointer-events: auto;
+  cursor: auto;
 }

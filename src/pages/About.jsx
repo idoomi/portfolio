@@ -1,8 +1,10 @@
 import './Page.css'
+import FloatingSprites from '../components/FloatingSprites.jsx'
 
 function About() {
   return (
     <section className="page">
+      <FloatingSprites />
       <h1>About Me</h1>
       <p>
         I'm a software developer with a passion for building well-crafted

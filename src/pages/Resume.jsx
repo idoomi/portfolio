@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import CvDownloadModal from '../components/CvDownloadModal.jsx'
+import FloatingSprites from '../components/FloatingSprites.jsx'
+import AnimatedSprite from '../components/AnimatedSprite.jsx'
 import './Page.css'
 import './Resume.css'
 
@@ -8,15 +10,19 @@ function Resume() {
 
   return (
     <section className="page">
+      <FloatingSprites showCat={false} />
       <div className="resume-header">
         <h1>Resume</h1>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Download CV (PDF)
-        </button>
+        <div className="resume-download">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Download CV (PDF)
+          </button>
+          <AnimatedSprite row={3} frameCount={10} size={60} className="resume-cat" />
+        </div>
         {isModalOpen && (
           <CvDownloadModal onClose={() => setIsModalOpen(false)} />
         )}

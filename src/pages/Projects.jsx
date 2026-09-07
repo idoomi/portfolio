@@ -1,5 +1,6 @@
 import './Page.css'
 import './Projects.css'
+import FloatingSprites from '../components/FloatingSprites.jsx'
 
 const projects = [
   {
@@ -25,6 +26,7 @@ const projects = [
 function Projects() {
   return (
     <section className="page">
+      <FloatingSprites />
       <h1>Projects</h1>
       <p>A selection of things I've built. Replace these with your own projects.</p>
       <div className="project-grid">

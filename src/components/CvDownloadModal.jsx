@@ -53,7 +53,10 @@ function CvDownloadModal({ onClose }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
-      onClick={onClose}
+      onClick={(event) => {
+        event.stopPropagation()
+        onClose()
+      }}
     >
       <div
         className="w-full max-w-sm rounded-lg border border-white/10 bg-[#16171d] p-6 text-left"
