@@ -13,7 +13,7 @@ function Navbar() {
   return (
     <header className="navbar">
       <NavLink to="/" className="navbar-brand" end>
-        Marian Amar
+        Marian Nadine Amar
       </NavLink>
       <nav className="navbar-links">
         {links.map((link) => (
