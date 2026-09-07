@@ -7,7 +7,7 @@ const projects = [
     title: 'Project One',
     description: 'A short description of this project goes here — what it does and what problem it solves.',
     tech: ['React', 'Node.js'],
-    link: '#',
+    link: 'https://websysproj-m7152wbgh-emi-e571.vercel.app/',
   },
   {
     title: 'Project Two',

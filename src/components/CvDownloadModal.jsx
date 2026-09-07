@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import emailjs from '@emailjs/browser'
 
 const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID
@@ -50,7 +51,7 @@ function CvDownloadModal({ onClose }) {
     }
   }
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
       onClick={(event) => {
@@ -100,7 +101,8 @@ function CvDownloadModal({ onClose }) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
