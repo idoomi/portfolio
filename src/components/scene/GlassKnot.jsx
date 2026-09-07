@@ -10,12 +10,21 @@ const DAMPING = 4
 // Water-brush deformation tuning
 const BRUSH_RADIUS = 0.65
 const BRUSH_RADIUS_SQ = BRUSH_RADIUS * BRUSH_RADIUS
-const BRUSH_STRENGTH_SCALE = 5
+const BRUSH_STRENGTH_SCALE = 4
 const BRUSH_MAX_STRENGTH = 1
 const BRUSH_DECAY = 0.9 // per-frame decay at 60fps, scaled by delta below
 const BRUSH_MIN_STRENGTH = 0.01
-const MAX_STROKES = 24
+const MAX_STROKES = 60
 const MAX_DISPLACEMENT = 0.32
+
+// Path sub-sampling so fast drags leave a continuous trail, not gaps
+const STEP_LENGTH = 0.05
+const MAX_STEPS_PER_MOVE = 8
+
+// How quickly the visible mesh eases toward the freshly computed target
+// shape each frame (higher = snappier, lower = softer/laggier trailing)
+const EASE_RATE = 9
+const SETTLE_EPSILON = 0.0006
 
 function GlassKnot() {
   const ref = useRef(null)
@@ -24,6 +33,7 @@ function GlassKnot() {
   const isPointerActive = useRef(true)
 
   const basePositions = useRef(null)
+  const targetPositions = useRef(null)
   const strokes = useRef([])
   const lastLocalPoint = useRef(null)
   const wasDeformed = useRef(false)
@@ -55,6 +65,7 @@ function GlassKnot() {
     const positionAttribute = geometry.attributes.position
     positionAttribute.setUsage(DynamicDrawUsage)
     basePositions.current = Float32Array.from(positionAttribute.array)
+    targetPositions.current = Float32Array.from(positionAttribute.array)
   }, [])
 
   const handleSurfaceMove = (event) => {
@@ -64,17 +75,31 @@ function GlassKnot() {
     const localPoint = ref.current.worldToLocal(event.point.clone())
 
     if (lastLocalPoint.current) {
-      const delta = localPoint.clone().sub(lastLocalPoint.current)
-      const distance = delta.length()
+      const fullDelta = localPoint.clone().sub(lastLocalPoint.current)
+      const fullDistance = fullDelta.length()
 
-      if (distance > 0.0005) {
-        strokes.current.push({
-          point: localPoint.clone(),
-          direction: delta,
-          strength: Math.min(distance * BRUSH_STRENGTH_SCALE, BRUSH_MAX_STRENGTH),
-        })
+      if (fullDistance > 0.0005) {
+        const steps = Math.min(
+          Math.max(Math.round(fullDistance / STEP_LENGTH), 1),
+          MAX_STEPS_PER_MOVE,
+        )
+        const stepDelta = fullDelta.multiplyScalar(1 / steps)
+        const stepStrength = Math.min(
+          fullDistance * BRUSH_STRENGTH_SCALE,
+          BRUSH_MAX_STRENGTH,
+        )
+        const cursor = lastLocalPoint.current.clone()
 
-        if (strokes.current.length > MAX_STROKES) {
+        for (let s = 0; s < steps; s++) {
+          cursor.add(stepDelta)
+          strokes.current.push({
+            point: cursor.clone(),
+            direction: stepDelta.clone(),
+            strength: stepStrength,
+          })
+        }
+
+        while (strokes.current.length > MAX_STROKES) {
           strokes.current.shift()
         }
       }
@@ -124,7 +149,8 @@ function GlassKnot() {
 
     const geometry = geometryRef.current
     const base = basePositions.current
-    if (!geometry || !base) return
+    const targetArray = targetPositions.current
+    if (!geometry || !base || !targetArray) return
 
     const decay = Math.pow(BRUSH_DECAY, delta * 60)
     for (let i = strokes.current.length - 1; i >= 0; i--) {
@@ -138,15 +164,13 @@ function GlassKnot() {
     const hasActiveStrokes = strokes.current.length > 0
     if (!hasActiveStrokes && !wasDeformed.current) return
 
-    const positionAttribute = geometry.attributes.position
-    const array = positionAttribute.array
-    array.set(base)
+    targetArray.set(base)
 
     if (hasActiveStrokes) {
       const activeStrokes = strokes.current
       const displacement = new Vector3()
 
-      for (let v = 0; v < array.length; v += 3) {
+      for (let v = 0; v < targetArray.length; v += 3) {
         const vx = base[v]
         const vy = base[v + 1]
         const vz = base[v + 2]
@@ -160,7 +184,11 @@ function GlassKnot() {
           const distSq = dx * dx + dy * dy + dz * dz
           if (distSq > BRUSH_RADIUS_SQ) continue
 
-          const falloff = Math.exp(-distSq / BRUSH_RADIUS_SQ) * stroke.strength
+          // Smooth polynomial falloff (zero value AND zero slope at the
+          // brush radius boundary) instead of a gaussian's long, jittery tail
+          const u = distSq / BRUSH_RADIUS_SQ
+          const falloff = (1 - u) * (1 - u) * (1 - u) * stroke.strength
+
           displacement.x += stroke.direction.x * falloff
           displacement.y += stroke.direction.y * falloff
           displacement.z += stroke.direction.z * falloff
@@ -171,15 +199,29 @@ function GlassKnot() {
           displacement.multiplyScalar(MAX_DISPLACEMENT / magnitude)
         }
 
-        array[v] += displacement.x
-        array[v + 1] += displacement.y
-        array[v + 2] += displacement.z
+        targetArray[v] += displacement.x
+        targetArray[v + 1] += displacement.y
+        targetArray[v + 2] += displacement.z
       }
+    }
+
+    // Ease the actual mesh toward the freshly computed target shape rather
+    // than snapping to it, so motion reads as fluid instead of jittery
+    const positionAttribute = geometry.attributes.position
+    const current = positionAttribute.array
+    const easeFactor = 1 - Math.exp(-EASE_RATE * delta)
+
+    let maxDiff = 0
+    for (let i = 0; i < current.length; i++) {
+      const diff = targetArray[i] - current[i]
+      current[i] += diff * easeFactor
+      const remaining = Math.abs(targetArray[i] - current[i])
+      if (remaining > maxDiff) maxDiff = remaining
     }
 
     positionAttribute.needsUpdate = true
     geometry.computeVertexNormals()
-    wasDeformed.current = hasActiveStrokes
+    wasDeformed.current = hasActiveStrokes || maxDiff > SETTLE_EPSILON
   })
 
   return (
