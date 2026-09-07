@@ -2,6 +2,7 @@ import { Canvas } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import GlassKnot from './GlassKnot.jsx'
 import GlowLights from './GlowLights.jsx'
+import CursorLight from './CursorLight.jsx'
 
 function HeroScene() {
   return (
@@ -10,12 +11,13 @@ function HeroScene() {
       dpr={[1, 2]}
       gl={{ antialias: true }}
     >
-      <color attach="background" args={['#0a0a0c']} />
+      <color attach="background" args={['#3c93ff']} />
       <ambientLight intensity={0.2} />
       <Environment preset="city" />
 
       <GlassKnot />
       <GlowLights />
+      <CursorLight />
     </Canvas>
   )
 }

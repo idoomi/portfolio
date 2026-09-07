@@ -1,4 +1,5 @@
 import HeroScene from '../components/scene/HeroScene.jsx'
+import CursorCoordinates from '../components/CursorCoordinates.jsx'
 
 function Home() {
   return (
@@ -6,6 +7,7 @@ function Home() {
       <div className="absolute inset-0">
         <HeroScene />
       </div>
+      <CursorCoordinates />
     </section>
   )
 }

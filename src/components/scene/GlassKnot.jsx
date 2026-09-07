@@ -1,7 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { MeshTransmissionMaterial } from '@react-three/drei'
-import { DynamicDrawUsage, MathUtils, Vector3 } from 'three'
+import { Color, DynamicDrawUsage, Float32BufferAttribute, MathUtils, Vector3 } from 'three'
+
+const GRADIENT_TOP_COLOR = new Color('#0a3d75')
+const GRADIENT_BOTTOM_COLOR = new Color('#bfe0ff')
 
 const ROTATION_INFLUENCE = 0.5
 const POSITION_INFLUENCE = 0.2
@@ -67,6 +70,27 @@ function GlassKnot() {
     positionAttribute.setUsage(DynamicDrawUsage)
     basePositions.current = Float32Array.from(positionAttribute.array)
     targetPositions.current = Float32Array.from(positionAttribute.array)
+
+    let minY = Infinity
+    let maxY = -Infinity
+    for (let i = 1; i < positionAttribute.array.length; i += 3) {
+      const y = positionAttribute.array[i]
+      if (y < minY) minY = y
+      if (y > maxY) maxY = y
+    }
+    const yRange = maxY - minY || 1
+
+    const colors = new Float32Array(positionAttribute.count * 3)
+    const color = new Color()
+    for (let i = 0, v = 0; i < positionAttribute.count; i++, v += 3) {
+      const y = positionAttribute.array[v + 1]
+      const t = (y - minY) / yRange
+      color.copy(GRADIENT_TOP_COLOR).lerp(GRADIENT_BOTTOM_COLOR, t)
+      colors[v] = color.r
+      colors[v + 1] = color.g
+      colors[v + 2] = color.b
+    }
+    geometry.setAttribute('color', new Float32BufferAttribute(colors, 3))
   }, [])
 
   const handleSurfaceMove = (event) => {
@@ -235,16 +259,21 @@ function GlassKnot() {
     >
       <torusKnotGeometry ref={geometryRef} args={[1, 0.32, 256, 32]} />
       <MeshTransmissionMaterial
+        vertexColors
+        transparent
+        opacity={1}
         transmission={1}
-        thickness={1.5}
-        roughness={0.1}
+        thickness={0.1}
+        roughness={0}
         ior={1.5}
-        chromaticAberration={0.05}
+        chromaticAberration={0.02}
         anisotropy={0.3}
-        distortion={0.1}
-        distortionScale={0.2}
-        temporalDistortion={0.1}
+        distortion={0.03}
+        distortionScale={0.05}
+        temporalDistortion={0.02}
         clearcoat={1}
+        samples={10}
+        resolution={1024}
         background={undefined}
       />
     </mesh>
