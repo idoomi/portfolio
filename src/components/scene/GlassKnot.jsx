@@ -8,14 +8,15 @@ const POSITION_INFLUENCE = 0.2
 const DAMPING = 4
 
 // Water-brush deformation tuning
-const BRUSH_RADIUS = 0.65
+const BRUSH_RADIUS = 0.85
 const BRUSH_RADIUS_SQ = BRUSH_RADIUS * BRUSH_RADIUS
-const BRUSH_STRENGTH_SCALE = 4
+const BRUSH_STRENGTH_SCALE = 6
 const BRUSH_MAX_STRENGTH = 1
-const BRUSH_DECAY = 0.9 // per-frame decay at 60fps, scaled by delta below
+const BRUSH_PUSH = 0.5 // displacement of a single fully-strength stroke, before falloff/clamp
+const BRUSH_DECAY = 0.92 // per-frame decay at 60fps, scaled by delta below
 const BRUSH_MIN_STRENGTH = 0.01
 const MAX_STROKES = 60
-const MAX_DISPLACEMENT = 0.32
+const MAX_DISPLACEMENT = 0.55
 
 // Path sub-sampling so fast drags leave a continuous trail, not gaps
 const STEP_LENGTH = 0.05
@@ -83,7 +84,8 @@ function GlassKnot() {
           Math.max(Math.round(fullDistance / STEP_LENGTH), 1),
           MAX_STEPS_PER_MOVE,
         )
-        const stepDelta = fullDelta.multiplyScalar(1 / steps)
+        const unitDirection = fullDelta.clone().normalize()
+        const stepVector = fullDelta.multiplyScalar(1 / steps)
         const stepStrength = Math.min(
           fullDistance * BRUSH_STRENGTH_SCALE,
           BRUSH_MAX_STRENGTH,
@@ -91,10 +93,10 @@ function GlassKnot() {
         const cursor = lastLocalPoint.current.clone()
 
         for (let s = 0; s < steps; s++) {
-          cursor.add(stepDelta)
+          cursor.add(stepVector)
           strokes.current.push({
             point: cursor.clone(),
-            direction: stepDelta.clone(),
+            direction: unitDirection,
             strength: stepStrength,
           })
         }
@@ -187,7 +189,8 @@ function GlassKnot() {
           // Smooth polynomial falloff (zero value AND zero slope at the
           // brush radius boundary) instead of a gaussian's long, jittery tail
           const u = distSq / BRUSH_RADIUS_SQ
-          const falloff = (1 - u) * (1 - u) * (1 - u) * stroke.strength
+          const falloff =
+            (1 - u) * (1 - u) * (1 - u) * stroke.strength * BRUSH_PUSH
 
           displacement.x += stroke.direction.x * falloff
           displacement.y += stroke.direction.y * falloff
