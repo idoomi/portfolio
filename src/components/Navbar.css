@@ -2,7 +2,6 @@
   display: flex;
   align-items: center;
   gap: 32px;
-  padding: 20px 32px;
   position: sticky;
   top: 0;
   background: rgba(10, 15, 25, 0.05);
@@ -11,8 +10,3 @@
   z-index: 10;
 }
 
-@media (max-width: 640px) {
-  .navbar {
-    padding: 16px;
-  }
-}
