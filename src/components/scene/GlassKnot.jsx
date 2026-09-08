@@ -5,6 +5,7 @@ import { Color, DynamicDrawUsage, Float32BufferAttribute, MathUtils, Vector3 } f
 
 const GRADIENT_TOP_COLOR = new Color('#0a3d75')
 const GRADIENT_BOTTOM_COLOR = new Color('#bfe0ff')
+const TRANSMISSION_BACKGROUND = new Color('#3c93ff')
 
 const ROTATION_INFLUENCE = 0.5
 const POSITION_INFLUENCE = 0.2
@@ -314,7 +315,7 @@ function GlassKnot({ interactive = true }) {
         clearcoat={1}
         samples={10}
         resolution={1024}
-        background={undefined}
+        background={TRANSMISSION_BACKGROUND}
       />
     </mesh>
   )

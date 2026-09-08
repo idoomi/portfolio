@@ -25,6 +25,7 @@ function App() {
 
   return (
     <div className="app-shell">
+      <div className="scene-backdrop" aria-hidden="true" />
       <div className="persistent-scene" aria-hidden="true">
         <HeroScene interactive={isHome} />
       </div>

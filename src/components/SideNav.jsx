@@ -18,6 +18,7 @@ function SideNav() {
         <NavLink
           key={link.to}
           to={link.to}
+          end={link.end}
           className={({ isActive }) =>
             isActive ? 'side-nav-link active' : 'side-nav-link'
           }
